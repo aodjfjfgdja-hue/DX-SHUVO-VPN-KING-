@@ -18,6 +18,8 @@ import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -36,8 +38,8 @@ import java.util.ArrayList;
 
 public class HubActivity extends Activity {
     private static final String UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-            + "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
-    private static final String HOME = "https://www.messenger.com/";
+            + "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+    private static final String HOME = "https://www.facebook.com/messages/";
 
     private final WebView[] webs = new WebView[6];
     private final TextView[] tabs = new TextView[6];
@@ -168,8 +170,16 @@ public class HubActivity extends Activity {
         w.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView v, String url, Bitmap f) { inject(v); }
+
             @Override
             public void onPageFinished(WebView v, String url) { inject(v); }
+
+            @Override
+            public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
+                if (r.isForMainFrame()) {
+                    Toast.makeText(HubActivity.this, "লোড হয়নি: " + e.getDescription(), Toast.LENGTH_LONG).show();
+                }
+            }
         });
         w.setWebChromeClient(new WebChromeClient() {
             @Override
