@@ -1,4 +1,4 @@
-Package com.dxmaster.multispace;
+package com.dxmaster.multispace;
 
 import android.Manifest;
 import android.app.Activity;
@@ -277,8 +277,8 @@ public class HubActivity extends Activity {
                 am.setSpeakerphoneOn(false);
             }
         } catch (Exception ignored) {}
-        for (int i = 1; i <= `5`; i++) {
-            if (webs[i] != `null`) {
+        for (int i = 1; i <= 5; i++) {
+            if (webs[i] != null) {
                 holder.removeView(webs[i]);
                 webs[i].destroy();
                 webs[i] = null;
