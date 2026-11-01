@@ -1,4 +1,4 @@
-package com.dxmaster.multispace;
+Package com.dxmaster.multispace;
 
 import android.Manifest;
 import android.app.Activity;
@@ -18,8 +18,6 @@ import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -38,8 +36,8 @@ import java.util.ArrayList;
 
 public class HubActivity extends Activity {
     private static final String UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-            + "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-    private static final String HOME = "https://www.facebook.com/messages/";
+            + "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+    private static final String HOME = "https://www.messenger.com/";
 
     private final WebView[] webs = new WebView[6];
     private final TextView[] tabs = new TextView[6];
@@ -159,7 +157,10 @@ public class HubActivity extends Activity {
         WebSettings s = w.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
+        s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
+        s.setLoadsImagesAutomatically(true);
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         s.setUserAgentString(UA);
         s.setLoadWithOverviewMode(true);
         s.setUseWideViewPort(true);
@@ -170,23 +171,21 @@ public class HubActivity extends Activity {
         w.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView v, String url, Bitmap f) { inject(v); }
-
             @Override
             public void onPageFinished(WebView v, String url) { inject(v); }
-
-            @Override
-            public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
-                if (r.isForMainFrame()) {
-                    Toast.makeText(HubActivity.this, "লোড হয়নি: " + e.getDescription(), Toast.LENGTH_LONG).show();
-                }
-            }
         });
+        
         w.setWebChromeClient(new WebChromeClient() {
             @Override
-            public void onPermissionRequest(final PermissionRequest r) {
-                runOnUiThread(() -> r.grant(r.getResources()));
+            public void onPermissionRequest(final PermissionRequest request) {
+                runOnUiThread(() -> {
+                    try {
+                        request.grant(request.getResources());
+                    } catch (Exception ignored) {}
+                });
             }
         });
+        
         holder.addView(w, new FrameLayout.LayoutParams(-1, -1));
         w.loadUrl(HOME);
         return w;
@@ -248,9 +247,12 @@ public class HubActivity extends Activity {
         super.onResume();
         if (boostOn) {
             try {
-                am.setSpeakerphoneOn(true);
-                am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
-                am.setStreamVolume(AudioManager.STREAM_VOICE_CALL, am.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL), 0);
+                if (am != null) {
+                    am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                    am.setSpeakerphoneOn(true);
+                    am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+                    am.setStreamVolume(AudioManager.STREAM_VOICE_CALL, am.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL), 0);
+                }
             } catch (Exception ignored) {}
         }
     }
@@ -269,9 +271,14 @@ public class HubActivity extends Activity {
     @Override
     protected void onDestroy() {
         try { unregisterReceiver(rx); } catch (Exception ignored) {}
-        try { am.setSpeakerphoneOn(false); } catch (Exception ignored) {}
-        for (int i = 1; i <= 5; i++) {
-            if (webs[i] != null) {
+        try { 
+            if (am != null) {
+                am.setMode(AudioManager.MODE_NORMAL);
+                am.setSpeakerphoneOn(false);
+            }
+        } catch (Exception ignored) {}
+        for (int i = 1; i <= `5`; i++) {
+            if (webs[i] != `null`) {
                 holder.removeView(webs[i]);
                 webs[i].destroy();
                 webs[i] = null;
